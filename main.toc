@@ -1,0 +1,19 @@
+\babel@toc {russian}{}\relax 
+\contentsline {section}{Введение}{2}{section*.2}%
+\contentsline {section}{\numberline {1}Теоретические основы алгоритма Дейкстры}{3}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Алгоритм Дейкстры}{3}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Реализация с использованием d-кучи}{3}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Реализация с использованием массивов}{4}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Теоретическое сравнение сложности}{5}{subsection.1.4}%
+\contentsline {section}{\numberline {2}Эксперименты 3.1 и 3.2: Зависимость времени от количества вершин}{6}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Методика проведения экспериментов}{6}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Эксперимент 3.1: Зависимость от n при разных плотностях графа}{6}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Эксперимент 3.2: Зависимость от n при линейном количестве ребер}{7}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Выводы по экспериментам 3.1 и 3.2}{8}{subsection.2.4}%
+\contentsline {section}{\numberline {3}Эксперименты 3.3 и 3.4: Дополнительные исследования}{9}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Эксперимент 3.3: Зависимость от количества ребер при фиксированном n}{9}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Эксперимент 3.4: Зависимость от диапазона весов ребер}{10}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Выводы по экспериментам 3.3 и 3.4}{11}{subsection.3.3}%
+\contentsline {section}{Заключение}{12}{section*.3}%
+\contentsline {section}{Список литературы}{13}{section*.4}%
+\contentsline {section}{Приложение A}{14}{section*.5}%

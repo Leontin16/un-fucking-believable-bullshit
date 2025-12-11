@@ -1,0 +1,226 @@
+\section*{Приложение A. Исходный код}
+\addcontentsline{toc}{section}{Приложение A}
+
+\subsection*{Реализация 15-кучи (min\_heap.h)}
+
+\begin{lstlisting}[language=C++, caption={Реализация 15-арной кучи}, label={lst:min_heap}]
+#pragma once
+#ifndef MINHEAP_H
+#define MINHEAP_H
+
+#include "vector.h"
+#include "vertex.h"
+
+class MinHeap {
+private:
+    static const int D = 15;
+    Vector<Vertex> heap;
+    Vector<int> vertexPositions;
+
+    int parent(int index) const {
+        return (index - 1) / D;
+    }
+
+    int firstChild(int index) const {
+        return D * index + 1;
+    }
+
+    int lastChild(int index) const {
+        return std::min(D * index + D, heap.size() - 1);
+    }
+
+    void heapifyUp(int index) {
+        while (index > 0) {
+            int parentIndex = parent(index);
+            if (heap[index] < heap[parentIndex]) {
+                Vertex temp = heap[index];
+                heap[index] = heap[parentIndex];
+                heap[parentIndex] = temp;
+
+                vertexPositions[heap[index].id] = index;
+                vertexPositions[heap[parentIndex].id] = parentIndex;
+
+                index = parentIndex;
+            }
+            else {
+                break;
+            }
+        }
+    }
+
+    void heapifyDown(int index) {
+        int size = heap.size();
+        while (firstChild(index) < size) {
+            int smallest = index;
+            int firstChildIndex = firstChild(index);
+            int lastChildIndex = lastChild(index);
+
+            for (int i = firstChildIndex; i <= lastChildIndex; i++) {
+                if (i < size && heap[i] < heap[smallest]) {
+                    smallest = i;
+                }
+            }
+
+            if (smallest != index) {
+                Vertex temp = heap[index];
+                heap[index] = heap[smallest];
+                heap[smallest] = temp;
+
+                vertexPositions[heap[index].id] = index;
+                vertexPositions[heap[smallest].id] = smallest;
+
+                index = smallest;
+            }
+            else {
+                break;
+            }
+        }
+    }
+
+public:
+    MinHeap(int capacity) {
+        heap = Vector<Vertex>();
+        vertexPositions = Vector<int>();
+        for (int i = 0; i < capacity; i++) {
+            vertexPositions.push_back(-1);
+        }
+    }
+
+    void push(const Vertex& vertex) {
+        heap.push_back(vertex);
+        int index = heap.size() - 1;
+        vertexPositions[vertex.id] = index;
+        heapifyUp(index);
+    }
+
+    Vertex pop() {
+        if (heap.empty()) {
+            return Vertex();
+        }
+
+        Vertex minVertex = heap[0];
+        vertexPositions[minVertex.id] = -1;
+
+        if (heap.size() > 1) {
+            heap[0] = heap[heap.size() - 1];
+            vertexPositions[heap[0].id] = 0;
+        }
+        heap.pop_back();
+
+        if (!heap.empty()) {
+            heapifyDown(0);
+        }
+
+        return minVertex;
+    }
+
+    void decreaseKey(int vertexId, int newDistance) {
+        int index = vertexPositions[vertexId];
+        if (index == -1 || heap[index].distance <= newDistance) {
+            return;
+        }
+
+        heap[index].distance = newDistance;
+        heapifyUp(index);
+    }
+
+    bool isEmpty() const {
+        return heap.empty();
+    }
+
+    bool contains(int vertexId) const {
+        return vertexId < vertexPositions.size() && vertexPositions[vertexId] != -1;
+    }
+
+    int size() const {
+        return heap.size();
+    }
+
+    bool isValid() const {
+        for (int i = 1; i < heap.size(); i++) {
+            int parentIndex = parent(i);
+            if (heap[parentIndex] > heap[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+};
+
+#endif
+\end{lstlisting}
+
+\subsection*{Основная программа экспериментов (main\_experiments.cpp)}
+
+\begin{lstlisting}[language=C++, caption={Программа для проведения экспериментов}, label={lst:main_experiments}]
+// Код main_experiments.cpp (основные функции)
+void runExperiment3_1() {
+    ofstream out("exp3_1.csv");
+    out << "n,m_type,m_count,time_A,time_B\n";
+    
+    int q = 1;
+    int r = 1000000;
+    int source = 0;
+
+    for (int n = 1; n <= 10001; n += 100) {
+        long long m_a = (long long)n * n / 10;
+        if (m_a < 1) m_a = 1;
+
+        Graph g_a = generateGraph(n, m_a, q, r);
+        double tA_a = runAlgoA(g_a, source);
+        double tB_a = runAlgoB(g_a, source);
+
+        out << n << ",n2_div_10," << m_a << "," << tA_a << "," << tB_a << "\n";
+
+        long long m_b = (long long)n * n;
+        long long max_edges = (long long)n * (n - 1);
+        if (m_b > max_edges) m_b = max_edges;
+
+        Graph g_b = generateGraph(n, m_b, q, r);
+        double tA_b = runAlgoA(g_b, source);
+        double tB_b = runAlgoB(g_b, source);
+
+        out << n << ",n2," << m_b << "," << tA_b << "," << tB_b << "\n";
+    }
+    out.close();
+}
+\end{lstlisting}
+
+\subsection*{Скрипт визуализации (plot\_graphs.py)}
+
+\begin{lstlisting}[language=Python, caption={Скрипт для построения графиков}, label={lst:plot_graphs}]
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def plot_exp3_1():
+    df = pd.read_csv('exp3_1.csv')
+    case_a = df[df['m_type'] == 'n2_div_10']
+    case_b = df[df['m_type'] == 'n2']
+
+    plt.figure(figsize=(12, 5))
+    
+    plt.subplot(1, 2, 1)
+    plt.plot(case_a['n'], case_a['time_A'], label='Алгоритм A (15-куча)', marker='o', markersize=3)
+    plt.plot(case_a['n'], case_a['time_B'], label='Алгоритм B (массивы)', marker='x', markersize=3)
+    plt.title(r'$m \approx n^2/10$')  % <-- ИСПРАВЛЕНО
+    plt.xlabel('Число вершин (n)')
+    plt.ylabel('Время (с)')
+    plt.legend()
+   
+    plt.grid(True, alpha=0.3)
+    plt.yscale('log')
+
+    plt.subplot(1, 2, 2)
+    plt.plot(case_b['n'], case_b['time_A'], label='Алгоритм A (15-куча)', marker='o', markersize=3)
+    plt.plot(case_b['n'], case_b['time_B'], label='Алгоритм B (массивы)', marker='x', markersize=3)
+    plt.title(r'$m \approx n^2$')     % <-- ИСПРАВЛЕНО
+    plt.xlabel('Число вершин (n)')
+    plt.ylabel('Время (с)')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.yscale('log')
+
+    plt.suptitle('Эксперимент 3.1: Зависимость времени от n при разных плотностях графа', fontsize=14)
+    plt.tight_layout()
+    plt.savefig('result_3_1.png', dpi=300)
+\end{lstlisting}

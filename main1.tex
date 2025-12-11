@@ -1,0 +1,95 @@
+\section{Теоретические основы алгоритма Дейкстры}
+\label{sec:theory}
+
+\subsection{Алгоритм Дейкстры}
+
+Алгоритм Дейкстры, предложенный Эдсгером Дейкстрой в 1959 году, решает задачу нахождения кратчайших путей от заданной начальной вершины до всех остальных вершин во взвешенном графе с неотрицательными весами ребер \cite{Dijkstra1959}.
+
+Основная идея алгоритма заключается в последовательном приближении к оптимальному решению, поддерживая множество вершин, для которых кратчайшее расстояние уже найдено. На каждом шаге выбирается вершина с наименьшим текущим расстоянием из множества еще не обработанных вершин, после чего обновляются расстояния до всех ее соседей.
+
+\subsection{Реализация с использованием d-кучи}
+
+Для эффективного выбора вершины с минимальным расстоянием используется структура данных \textit{d-куча} (обобщение двоичной кучи, где каждый узел имеет не более $d$ потомков). В данной работе используется $d = 15$.
+
+\begin{algorithm}[H]
+\caption{Алгоритм Дейкстры с d-кучей}
+\begin{algorithmic}[1]
+\Procedure{Dijkstra}{$G, source$}
+\State $dist[0 \dots n-1] \gets \infty$
+\State $dist[source] \gets 0$
+\State $heap \gets$ MinHeap($n$)
+\For{$v \gets 0$ to $n-1$}
+	\State $heap.push(Vertex(v, dist[v]))$
+\EndFor
+\While{$\neg heap.isEmpty()$}
+	\State $u \gets heap.pop()$
+	\ForAll{$(u, v, w) \in G.adjacent(u)$}
+		\If{$dist[u] + w < dist[v]$}
+			\State $dist[v] \gets dist[u] + w$
+			\State $heap.decreaseKey(v, dist[v])$
+		\EndIf
+	\EndFor
+\EndWhile
+\State \Return $dist$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\textbf{Сложность:} 
+\begin{itemize}
+	\item Инициализация кучи: $O(n)$
+	\item Каждая операция \texttt{pop}: $O(d \cdot \log_d n)$
+	\item Каждая операция \texttt{decreaseKey}: $O(\log_d n)$
+	\item Общая сложность: $O((n + m) \cdot \log_d n)$
+\end{itemize}
+
+При $d = \lceil m/n \rceil$ достигается оптимальная асимптотика $O(m \cdot \log_{m/n} n)$.
+
+\subsection{Реализация с использованием массивов}
+
+Наивная реализация использует массив для хранения расстояний и на каждом шаге линейно ищет вершину с минимальным расстоянием.
+
+\begin{algorithm}[H]
+\caption{Алгоритм Дейкстры с массивами}
+\begin{algorithmic}[1]
+\Procedure{DijkstraArray}{$G, source$}
+\State $dist[0 \dots n-1] \gets \infty$
+\State $visited[0 \dots n-1] \gets false$
+\State $dist[source] \gets 0$
+\For{$i \gets 0$ to $n-1$}
+	\State $u \gets -1$, $minDist \gets \infty$
+	\For{$v \gets 0$ to $n-1$}
+		\If{$\neg visited[v] \wedge dist[v] < minDist$}
+			\State $minDist \gets dist[v]$
+			\State $u \gets v$
+		\EndIf
+	\EndFor
+	\If{$u = -1$} \textbf{break} \EndIf
+	\State $visited[u] \gets true$
+	\ForAll{$(u, v, w) \in G.adjacent(u)$}
+		\If{$dist[u] + w < dist[v]$}
+			\State $dist[v] \gets dist[u] + w$
+		\EndIf
+	\EndFor
+\EndFor
+\State \Return $dist$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\textbf{Сложность:} $O(n^2 + m)$, что эквивалентно $O(n^2)$ для плотных графов.
+
+\subsection{Теоретическое сравнение сложности}
+
+\begin{table}[H]
+\centering
+\caption{Сравнение теоретической сложности реализаций}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Тип графа} & \textbf{m} & \textbf{d-куча} & \textbf{Массивы} \\ \hline
+Разреженный & $O(n)$ & $O(n \log_d n)$ & $O(n^2)$ \\ \hline
+Плотный & $O(n^2)$ & $O(n^2 \log_d n)$ & $O(n^2)$ \\ \hline
+\end{tabular}
+\end{table}
+
+Для разреженных графов ($m = O(n)$) реализация с d-кучей имеет асимптотическое преимущество $O(n \log n)$ против $O(n^2)$. Для плотных графов разница менее выражена.
